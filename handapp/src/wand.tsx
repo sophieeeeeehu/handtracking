@@ -67,36 +67,117 @@ function Wand() {
         }
 
 
+        function isOkSign(landmarks: any[]) {
+
+            let openFingers = 0;
+
+            if (dist(landmarks[4], landmarks[8]) < dist(landmarks[4], landmarks[7])) {
+                openFingers++;
+            }
+
+            if (dist(landmarks[12], landmarks[9]) > dist(landmarks[11], landmarks[9])) {
+                openFingers++;
+            }
+
+            if (dist(landmarks[20], landmarks[17]) > dist(landmarks[19], landmarks[17])) {
+                openFingers++;
+            }
+
+            // 3+ fingers open = open hand
+            return openFingers >= 3;
+        }
+
+        function isMiddle(landmarks: any[]) {
+
+            let openFingers = 0;
+            if (landmarks[12].y < landmarks[10].y) {
+                openFingers++;
+            }
+
+            if (landmarks[11].y < landmarks[10].y) {
+                openFingers++;
+            }
+            // 3+ fingers open = open hand
+            return openFingers >= 2;
+        }
+
+        function isFirst(landmarks: any[]) {
+
+            let openFingers = 0;
+
+            if (landmarks[8].y < landmarks[6].y) {
+                openFingers++;
+            }
+
+            if (landmarks[7].y < landmarks[6].y) {
+                openFingers++;
+            }
+            // 3+ fingers open = open hand
+            return openFingers >= 2;
+        }
+
+        function isFour(landmarks: any[]) {
+
+            let openFingers = 0;
+
+            if (landmarks[16].y < landmarks[14].y) {
+                openFingers++;
+            }
+
+            if (landmarks[15].y < landmarks[14].y) {
+                openFingers++;
+            }
+            // 3+ fingers open = open hand
+            return openFingers >= 2;
+        }
+
         hands.onResults((results) => {
             const canvas = canvasRef.current!;
             const ctx = canvas.getContext("2d")!;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            //   if (results.multiHandLandmarks?.length) {
-            //     const landmarks = results.multiHandLandmarks[0];
-
-            //     const open = isHandOpen(landmarks);
-            //     const emoji = open ? "🐶" : "";
-
-
-            //     // Palm center-ish (landmark 9 works well)
-            //     const x = landmarks[9].x * canvas.width;
-            //     const y = landmarks[9].y * canvas.height;
-
-            //     ctx.font = "48px serif";
-            //     ctx.fillText(emoji, x - 24, y + 24);
-            //   }
-            // 
-
             results.multiHandLandmarks?.forEach((landmarks) => {
 
-                for (let i = 1; i <= 20; i++) {
-                    const x = landmarks[i].x * canvas.width;
-                    const y = landmarks[i].y * canvas.height;
 
-                    ctx.font = "16px serif";
-                    ctx.fillText(i.toString(), x - 5, y + 5);
+
+                ctx.font = "48px serif";
+                const ok = isOkSign(landmarks)
+                const middle = isMiddle(landmarks)
+                const first = isFirst(landmarks)
+                const four = isFour(landmarks)
+
+                if (ok && four) {
+                    const x = landmarks[4].x * canvas.width;
+                    const y = landmarks[4].y * canvas.height;
+                    ctx.fillText("👽", x - 30, y + 5);
+
                 }
+
+                if (!ok && first && !middle) {
+                    const x = landmarks[8].x * canvas.width;
+                    const y = landmarks[8].y * canvas.height;
+                    ctx.fillText("💡", x - 30, y + 5);
+                }
+
+                if (!ok && !first && middle) {
+                    const x = landmarks[12].x * canvas.width;
+                    const y = landmarks[12].y * canvas.height;
+                    ctx.fillText("👹", x - 30, y + 5);
+
+                }
+
+                if (!ok && first && middle && !four) {
+                    const x = landmarks[12].x * canvas.width;
+                    const y = landmarks[12].y * canvas.height;
+
+                    const x1 = landmarks[8].x * canvas.width;
+                    const y1 = landmarks[8].y * canvas.height;
+                    ctx.fillText("✌️", x - 30, y + 5);
+                    ctx.fillText("✌️", x1 - 30, y1 + 5);
+
+                }
+
+
             });
         });
 
